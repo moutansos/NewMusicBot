@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NewMusicBot.Services;
 
 namespace NewMusicBot
 {
@@ -18,6 +20,7 @@ namespace NewMusicBot
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddSingleton<IConfigurationProvider>(s => new Services.ConfigurationProvider(hostContext.Configuration));
                     services.AddHostedService<Worker>();
                 });
     }
