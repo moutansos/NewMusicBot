@@ -51,7 +51,7 @@ namespace NewMusicBot
         private async Task MessageReceived(SocketMessage messageParam)
         {
             // Don't process the command if it was a system message
-            SocketUserMessage message = messageParam as SocketUserMessage;
+                SocketUserMessage message = messageParam as SocketUserMessage;
             if (message == null) return;
 
             // Create a number to track where the prefix ends and the command begins

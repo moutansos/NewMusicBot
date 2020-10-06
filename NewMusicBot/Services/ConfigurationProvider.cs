@@ -20,5 +20,7 @@ namespace NewMusicBot.Services
         }
 
         public string DiscordToken => configuration.GetValue<string>("DiscordToken");
+        public string SpotifyClientId => configuration.GetValue<string>(nameof(SpotifyClientId));
+        public string SpotifyClientSectret => configuration.GetValue<string>(nameof(SpotifyClientSectret));
     }
 }
