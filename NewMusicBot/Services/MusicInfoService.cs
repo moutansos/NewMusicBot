@@ -2,11 +2,7 @@
 using NewMusicBot.Infrastructure.SpotifyApi.Queries;
 using NewMusicBot.Models;
 using SpotifyAPI.Web;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NewMusicBot.Services
 {
@@ -23,6 +19,7 @@ namespace NewMusicBot.Services
         {
             this.dataLayer = dataLayer;
         }
+
 
         public async IAsyncEnumerable<Artist> SearchForArtist(string query)
         {

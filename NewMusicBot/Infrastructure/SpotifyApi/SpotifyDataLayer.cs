@@ -17,10 +17,8 @@ namespace NewMusicBot.Infrastructure.SpotifyApi
     {
         private readonly ISpotifyClient client;
 
-        public SpotifyDataLayer(ISpotifyClient client)
-        {
+        public SpotifyDataLayer(ISpotifyClient client) => 
             this.client = client;
-        }
 
         public T ExecuteQuery<T>(ISpotifyQuery<T> query) => query.ExecuteAsync(client);
     }

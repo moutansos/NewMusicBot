@@ -1,11 +1,8 @@
 ﻿using Discord.Commands;
-using Microsoft.Extensions.FileSystemGlobbing;
 using NewMusicBot.Models;
 using NewMusicBot.Services;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NewMusicBot.CommandModules
@@ -13,10 +10,10 @@ namespace NewMusicBot.CommandModules
     [Group("add")]
     public class AddModule : ModuleBase<SocketCommandContext>
     {
-        private readonly IMusicInfoService musicInfoService;
+        private readonly INewMusicBotService service;
 
-        public AddModule(IMusicInfoService musicInfoService) =>
-            this.musicInfoService = musicInfoService;
+        public AddModule(INewMusicBotService service) =>
+            this.service = service;
 
         [Command]
         public async Task AddCommand() => await ReplyAsync("Add things");
@@ -24,9 +21,8 @@ namespace NewMusicBot.CommandModules
         [Command("artist")]
         public async Task AddArtist([Remainder] string artistSearchQuery)
         {
-            IEnumerable<Artist> artists = await musicInfoService
-                .SearchForArtist(artistSearchQuery)
-                .ToListAsync();
+            ulong channelId = Context.Channel.Id;
+            IEnumerable<Artist> artists = await service.InitiateArtistSubscriptionSearch(channelId, artistSearchQuery);
 
             IEnumerable<string> artistStrings = artists
                 .Select((artist, index) => $"{index + 1}. {artist.Name} {artist.Url}");

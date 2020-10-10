@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NewMusicBot.Infrastructure.CosmosDb;
 using NewMusicBot.Infrastructure.SpotifyApi;
 using NewMusicBot.Services;
 using SpotifyAPI.Web;
@@ -33,9 +35,23 @@ namespace NewMusicBot
 
                         return new SpotifyClient(config);
                     });
+                    services.AddTransient(s =>
+                    {
+                        CosmosClientOptions options = new CosmosClientOptions()
+                        {
+                            SerializerOptions = new CosmosSerializationOptions()
+                            {
+                                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+                            }
+                        };
+                        return new CosmosClient(configProvider.CosmosConnectionString, options);
+                    });
                     services.AddTransient<ISpotifyDataLayer, SpotifyDataLayer>();
                     services.AddSingleton<IConfigurationProvider>(configProvider);
                     services.AddTransient<IMusicInfoService, MusicInfoService>();
+                    services.AddTransient<ICosmosDataLayer, CosmosDataLayer>();
+                    services.AddTransient<ISubscriptionService, SubscriptionService>();
+                    services.AddTransient<INewMusicBotService, NewMusicBotService>();
                     services.AddHostedService<Worker>();
                 });
     }
