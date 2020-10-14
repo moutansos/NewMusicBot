@@ -3,11 +3,14 @@ using NewMusicBot.Infrastructure.SpotifyApi.Queries;
 using NewMusicBot.Models;
 using SpotifyAPI.Web;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NewMusicBot.Services
 {
     public interface IMusicInfoService
     {
+        Task<SubscribedArtist> RetrieveSubscribedArtist(string id);
         IAsyncEnumerable<Artist> SearchForArtist(string query);
     }
 
@@ -33,6 +36,14 @@ namespace NewMusicBot.Services
             }
 
             yield break;
+        }
+
+        public async Task<SubscribedArtist> RetrieveSubscribedArtist(string id)
+        {
+            IEnumerable<SimpleAlbum> albums = await dataLayer.ExecuteQuery(new AlbumsForArtistQuery(id)).ToListAsync();
+            FullArtist artist = await dataLayer.ExecuteQuery(new ArtistByIdQuery(id));
+
+            return new SubscribedArtist(id, artist.Name, albums.Select(album => album.Id));
         }
     }
 }

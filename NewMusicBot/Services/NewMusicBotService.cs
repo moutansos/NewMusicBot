@@ -11,6 +11,7 @@ namespace NewMusicBot.Services
     public interface INewMusicBotService
     {
         Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, string artistQuery);
+        Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection);
     }
 
     public class NewMusicBotService : INewMusicBotService
@@ -42,7 +43,8 @@ namespace NewMusicBot.Services
             {
                 DiscordChannel newDiscordChannel = new DiscordChannel(
                     id: $"{channelId}",
-                    currentArtistOptions: artistOptions);
+                    currentArtistOptions: artistOptions,
+                    subscribedArtists: new SubscribedArtist[] { });
 
                 await subscriptionService.CreateChannel(newDiscordChannel);
             }
@@ -54,6 +56,28 @@ namespace NewMusicBot.Services
             }
 
             return artists;
+        }
+
+        public async Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection)
+        {
+            DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
+
+            string? artistId = channel?.CurrentArtistOptions?[selection];
+
+            if (artistId is null)
+                return null;
+
+            SubscribedArtist newArtist = await musicInfoService.RetrieveSubscribedArtist(artistId);
+            
+            if (channel is null)
+                return null;
+
+            DiscordChannel updatedChannel = channel.WithSubscribedArtistAdded(newArtist);
+            DiscordChannel channelWithoutCurrent = updatedChannel.WithNewCurrentArtistOptions(new Dictionary<int, string>());
+
+            await subscriptionService.UpdateChannel(channelWithoutCurrent);
+
+            return newArtist;
         }
     }
 }
