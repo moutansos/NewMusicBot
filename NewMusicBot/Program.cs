@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NewMusicBot.BackgroundServices;
 using NewMusicBot.Infrastructure.CosmosDb;
 using NewMusicBot.Infrastructure.SpotifyApi;
 using NewMusicBot.Services;
@@ -52,7 +53,9 @@ namespace NewMusicBot
                     services.AddTransient<ICosmosDataLayer, CosmosDataLayer>();
                     services.AddTransient<ISubscriptionService, SubscriptionService>();
                     services.AddTransient<INewMusicBotService, NewMusicBotService>();
+                    services.AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>();
                     services.AddHostedService<Worker>();
+                    services.AddHostedService<MyTestHostedService>();
                 });
     }
 }

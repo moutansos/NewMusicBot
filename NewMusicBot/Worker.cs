@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,23 +14,20 @@ namespace NewMusicBot
     public class Worker : BackgroundService
     {
         private const char START_SEQUENCE = '!';
-        private readonly ILogger<Worker> logger;
         private readonly DiscordSocketClient client;
         private readonly IConfigurationProvider configuration;
         private readonly CommandService commandService;
         private readonly IServiceProvider serviceProvider;
+        private readonly IDiscordClientWrapper clientWrapper;
 
-        public Worker(ILogger<Worker> logger, IConfigurationProvider configuration, IServiceProvider serviceProvider)
+        public Worker(ILogger<Worker> logger, IConfigurationProvider configuration, IServiceProvider serviceProvider, IDiscordClientWrapper clientWrapper)
         {
-            this.logger = logger;
-
-            client = new DiscordSocketClient();
-            client.Log += Log;
-
             this.configuration = configuration;
             this.commandService = new CommandService();
 
             this.serviceProvider = serviceProvider;
+            this.clientWrapper = clientWrapper;
+            this.client = clientWrapper.Client;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -40,8 +35,7 @@ namespace NewMusicBot
             await commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
                                                  services: serviceProvider);
 
-            await client.LoginAsync(TokenType.Bot, configuration.DiscordToken);
-            await client.StartAsync();
+            await clientWrapper.StartAsync();
 
             client.MessageReceived += MessageReceived;
 
@@ -51,8 +45,7 @@ namespace NewMusicBot
         private async Task MessageReceived(SocketMessage messageParam)
         {
             // Don't process the command if it was a system message
-                SocketUserMessage message = messageParam as SocketUserMessage;
-            if (message == null) return;
+            if (!(messageParam is SocketUserMessage message)) return;
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
@@ -65,12 +58,6 @@ namespace NewMusicBot
 
             SocketCommandContext context = new SocketCommandContext(client, message);
             await commandService.ExecuteAsync(context, argPos, serviceProvider);
-        }
-
-        private Task Log(LogMessage msg)
-        {
-            logger.LogInformation(msg.ToString());
-            return Task.CompletedTask;
         }
     }
 }

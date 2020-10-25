@@ -10,6 +10,7 @@ namespace NewMusicBot.Services
 {
     public interface IMusicInfoService
     {
+        Task<Release> GetReleaseById(string id);
         Task<SubscribedArtist> RetrieveSubscribedArtist(string id);
         IAsyncEnumerable<Artist> SearchForArtist(string query);
     }
@@ -34,7 +35,7 @@ namespace NewMusicBot.Services
                     name: artist.Name,
                     url: artist.ExternalUrls["spotify"]);
             }
-
+            
             yield break;
         }
 
@@ -44,6 +45,19 @@ namespace NewMusicBot.Services
             FullArtist artist = await dataLayer.ExecuteQuery(new ArtistByIdQuery(id));
 
             return new SubscribedArtist(id, artist.Name, albums.Select(album => album.Id));
+        }
+
+        public async Task<Release> GetReleaseById(string id)
+        {
+            FullAlbum album = await dataLayer.ExecuteQuery(new AlbumByIdQuery(id));
+            SimpleArtist artist = album.Artists.First();
+            return new Release(
+                id,
+                name: album.Name,
+                artistId: artist.Id,
+                artistName: artist.Name,
+                url: album.ExternalUrls["spotify"]);
+                
         }
     }
 }

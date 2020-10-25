@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.13.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.8" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+    <PackageReference Include="NCrontab" Version="3.3.1" />
     <PackageReference Include="SpotifyAPI.Web" Version="6.0.0-beta.12" />
   </ItemGroup>
 </Project>

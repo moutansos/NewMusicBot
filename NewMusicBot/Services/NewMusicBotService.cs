@@ -10,7 +10,7 @@ namespace NewMusicBot.Services
 {
     public interface INewMusicBotService
     {
-        Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, string artistQuery);
+        Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, ulong guildId, string artistQuery);
         Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection);
     }
 
@@ -26,7 +26,7 @@ namespace NewMusicBot.Services
         }
 
 
-        public async Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, string artistQuery)
+        public async Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, ulong guildId, string artistQuery)
         {
             IEnumerable<Artist> artists = await musicInfoService.SearchForArtist(artistQuery)
                 .ToListAsync();
@@ -43,6 +43,7 @@ namespace NewMusicBot.Services
             {
                 DiscordChannel newDiscordChannel = new DiscordChannel(
                     id: $"{channelId}",
+                    guildId,
                     currentArtistOptions: artistOptions,
                     subscribedArtists: new SubscribedArtist[] { });
 
@@ -78,6 +79,31 @@ namespace NewMusicBot.Services
             await subscriptionService.UpdateChannel(channelWithoutCurrent);
 
             return newArtist;
+        }
+
+        public async IAsyncEnumerable<ReleaseMessage> CheckSubscriptions()
+        {
+            IAsyncEnumerable<DiscordChannel> channels = subscriptionService.GetAllChannels();
+
+            await foreach(DiscordChannel channel in channels)
+            {
+                foreach (SubscribedArtist savedArtist in channel.SubscribedArtists)
+                {
+                    SubscribedArtist currentArtist = await musicInfoService.RetrieveSubscribedArtist(savedArtist.Id);
+                    IEnumerable<string> savedReleases = savedArtist.Albums;
+                    IEnumerable<string> currentReleases = currentArtist.Albums;
+
+                    IEnumerable<string> newReleases = currentReleases.Except(savedReleases);
+
+                    if (newReleases.Any())
+                        yield return new ReleaseMessage(
+                            releases: await Task.WhenAll(newReleases.Select(releaseId => musicInfoService.GetReleaseById(releaseId))),
+                            guildId: channel.GuildId,
+                            channnelId: Convert.ToUInt64(channel.Id));
+
+                    //TODO: Figure out best way to update the DB with the new releases
+                }
+            }
         }
     }
 }

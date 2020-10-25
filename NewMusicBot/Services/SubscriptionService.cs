@@ -2,9 +2,7 @@
 using NewMusicBot.Infrastructure.CosmosDb.Command;
 using NewMusicBot.Infrastructure.CosmosDb.Queries;
 using NewMusicBot.Models;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NewMusicBot.Services
@@ -12,6 +10,7 @@ namespace NewMusicBot.Services
     public interface ISubscriptionService
     {
         Task<DiscordChannel> CreateChannel(DiscordChannel channel);
+        IAsyncEnumerable<DiscordChannel> GetAllChannels();
         Task<DiscordChannel?> GetChannel(ulong channelId);
         Task<DiscordChannel> UpdateChannel(DiscordChannel channel);
     }
@@ -33,5 +32,8 @@ namespace NewMusicBot.Services
 
         public async Task<DiscordChannel> UpdateChannel(DiscordChannel channel) =>
             await cosmosDataLayer.ExecuteCommand(new UpdateDiscordChannelCommand(channel));
+
+        public IAsyncEnumerable<DiscordChannel> GetAllChannels() =>
+            cosmosDataLayer.ExecuteQuery(new GetAllDiscordChannels());
     }
 }
