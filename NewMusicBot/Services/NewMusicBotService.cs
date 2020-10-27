@@ -81,29 +81,31 @@ namespace NewMusicBot.Services
             return newArtist;
         }
 
-        public async IAsyncEnumerable<ReleaseMessage> CheckSubscriptions()
+        public async Task CheckSubscriptions()
         {
             IAsyncEnumerable<DiscordChannel> channels = subscriptionService.GetAllChannels();
 
             await foreach(DiscordChannel channel in channels)
             {
-                foreach (SubscribedArtist savedArtist in channel.SubscribedArtists)
+                IEnumerable<(IEnumerable<string> newReleases, SubscribedArtist currentArtist)> results = await Task.WhenAll(channel.SubscribedArtists.Select(async savedArtist =>
                 {
                     SubscribedArtist currentArtist = await musicInfoService.RetrieveSubscribedArtist(savedArtist.Id);
                     IEnumerable<string> savedReleases = savedArtist.Albums;
                     IEnumerable<string> currentReleases = currentArtist.Albums;
 
-                    IEnumerable<string> newReleases = currentReleases.Except(savedReleases);
+                    return (currentReleases.Except(savedReleases), currentArtist);
+                }));
 
-                    if (newReleases.Any())
-                        yield return new ReleaseMessage(
-                            releases: await Task.WhenAll(newReleases.Select(releaseId => musicInfoService.GetReleaseById(releaseId))),
-                            guildId: channel.GuildId,
-                            channnelId: Convert.ToUInt64(channel.Id));
+                IEnumerable<(IEnumerable<string> newReleases, SubscribedArtist currentArtist)> artistsWithNewReleases = results.Where(artist => artist.newReleases.Any());
 
-                    //TODO: Figure out best way to update the DB with the new releases
-                }
+                DiscordChannel updatedChannel = artistsWithNewReleases
+                    .Aggregate(channel, (currentChannel, artist) => currentChannel.WithUpdatedSubscribedArtist(artist.currentArtist));
+
+
+                //TODO: Update Channel
+                //TODO: Return the update messages to discord chat
             }
+            
         }
     }
 }
