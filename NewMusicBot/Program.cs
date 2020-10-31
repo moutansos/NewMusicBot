@@ -55,7 +55,7 @@ namespace NewMusicBot
                     services.AddTransient<INewMusicBotService, NewMusicBotService>();
                     services.AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>();
                     services.AddHostedService<Worker>();
-                    services.AddHostedService<MyTestHostedService>();
+                    services.AddHostedService<NewMusicChecker>();
                 });
     }
 }

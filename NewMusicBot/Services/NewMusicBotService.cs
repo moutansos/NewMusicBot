@@ -10,6 +10,7 @@ namespace NewMusicBot.Services
 {
     public interface INewMusicBotService
     {
+        IAsyncEnumerable<ReleaseMessage> CheckSubscriptions();
         Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, ulong guildId, string artistQuery);
         Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection);
     }
@@ -43,7 +44,7 @@ namespace NewMusicBot.Services
             {
                 DiscordChannel newDiscordChannel = new DiscordChannel(
                     id: $"{channelId}",
-                    guildId,
+                    guildId: $"{guildId}",
                     currentArtistOptions: artistOptions,
                     subscribedArtists: new SubscribedArtist[] { });
 
@@ -81,7 +82,7 @@ namespace NewMusicBot.Services
             return newArtist;
         }
 
-        public async Task CheckSubscriptions()
+        public async IAsyncEnumerable<ReleaseMessage> CheckSubscriptions()
         {
             IAsyncEnumerable<DiscordChannel> channels = subscriptionService.GetAllChannels();
 
@@ -101,9 +102,13 @@ namespace NewMusicBot.Services
                 DiscordChannel updatedChannel = artistsWithNewReleases
                     .Aggregate(channel, (currentChannel, artist) => currentChannel.WithUpdatedSubscribedArtist(artist.currentArtist));
 
+                await subscriptionService.UpdateChannel(updatedChannel);
 
-                //TODO: Update Channel
-                //TODO: Return the update messages to discord chat
+                foreach((IEnumerable<string> newReleases, SubscribedArtist currentArtist) in artistsWithNewReleases)
+                    yield return new ReleaseMessage(
+                        releases: await Task.WhenAll(newReleases.Select(newRelease => musicInfoService.GetReleaseById(newRelease))),
+                        guildId: Convert.ToUInt64(updatedChannel.GuildId),
+                        channnelId: Convert.ToUInt64(updatedChannel.Id));
             }
             
         }

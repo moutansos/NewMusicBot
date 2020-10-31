@@ -1,6 +1,8 @@
 ﻿using Discord.Commands;
+using Discord.WebSocket;
 using NewMusicBot.Models;
 using NewMusicBot.Services;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -23,7 +25,8 @@ namespace NewMusicBot.CommandModules
         public async Task AddArtist([Remainder] string artistSearchQuery)
         {
             ulong channelId = Context.Channel.Id;
-            IEnumerable<Artist> artists = await service.InitiateArtistSubscriptionSearch(channelId, Context.Guild.Id, artistSearchQuery);
+            SocketTextChannel channel = Context.Channel as SocketTextChannel ?? throw new InvalidOperationException("Channel was not text channel");
+            IEnumerable<Artist> artists = await service.InitiateArtistSubscriptionSearch(channelId, channel.Guild.Id, artistSearchQuery);
 
             IEnumerable<string> artistStrings = artists
                 .Select((artist, index) => $"{index + 1}. {artist.Name} {artist.Url}");

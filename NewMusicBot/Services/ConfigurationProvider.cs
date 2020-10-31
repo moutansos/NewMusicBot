@@ -8,6 +8,8 @@ namespace NewMusicBot.Services
     public interface IConfigurationProvider
     {
         string DiscordToken { get; }
+        int CheckInterval { get; }
+        string CheckSchedule { get; }
     }
 
     public class ConfigurationProvider : IConfigurationProvider
@@ -23,5 +25,7 @@ namespace NewMusicBot.Services
         public string SpotifyClientId => configuration.GetValue<string>(nameof(SpotifyClientId));
         public string SpotifyClientSectret => configuration.GetValue<string>(nameof(SpotifyClientSectret));
         public string CosmosConnectionString => configuration.GetValue<string>(nameof(CosmosConnectionString));
+        public string CheckSchedule => configuration.GetValue<string>(nameof(CheckSchedule));
+        public int CheckInterval => configuration.GetValue<int>(nameof(CheckInterval));
     }
 }

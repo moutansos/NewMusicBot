@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace NewMusicBot.Models
 {
@@ -9,6 +7,7 @@ namespace NewMusicBot.Models
         public IEnumerable<Release> Releases { get; }
         public ulong GuildId { get; }
         public ulong ChannelId { get; }
+        public string ArtistName { get; }
 
         public ReleaseMessage(IEnumerable<Release> releases, ulong guildId, ulong channnelId) 
         {

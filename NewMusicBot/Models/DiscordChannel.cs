@@ -9,7 +9,7 @@ namespace NewMusicBot.Models
     public class DiscordChannel
     {
         [JsonConstructor]
-        public DiscordChannel(string id, ulong guildId, IReadOnlyDictionary<int, string>? currentArtistOptions, IEnumerable<SubscribedArtist>? subscribedArtists)
+        public DiscordChannel(string id, string guildId, IReadOnlyDictionary<int, string>? currentArtistOptions, IEnumerable<SubscribedArtist>? subscribedArtists)
         {
             this.Id = id;
             this.GuildId = guildId;
@@ -18,7 +18,7 @@ namespace NewMusicBot.Models
         }
 
         public string Id { get; }
-        public ulong GuildId { get; }
+        public string GuildId { get; }
         public IReadOnlyDictionary<int, string>? CurrentArtistOptions { get; }
         public IEnumerable<SubscribedArtist> SubscribedArtists { get; }
 
