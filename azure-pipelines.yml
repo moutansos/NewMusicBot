@@ -26,7 +26,8 @@ stages:
         containerRegistry: 'Docker Hub - moutansos'
         repository: 'newmusicbot'
         command: 'buildAndPush'
-        dockerfile: '$(Build.SourcesDirectory)/NewMusicBot/Dockerfile'
+        Dockerfile: '**/Dockerfile'
+        buildContext: '.'
         tags: |
           $(Build.BuildId)
           latest
