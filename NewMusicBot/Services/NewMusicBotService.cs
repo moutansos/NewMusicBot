@@ -11,6 +11,7 @@ namespace NewMusicBot.Services
     public interface INewMusicBotService
     {
         IAsyncEnumerable<ReleaseMessage> CheckSubscriptions();
+        Task<IEnumerable<SubscribedArtist>> GetAllSubscribedArtists(ulong channelId);
         Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, ulong guildId, string artistQuery);
         Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection);
     }
@@ -24,6 +25,12 @@ namespace NewMusicBot.Services
         {
             this.subscriptionService = subscriptionService;
             this.musicInfoService = musicInfoService;
+        }
+
+        public async Task<IEnumerable<SubscribedArtist>> GetAllSubscribedArtists(ulong channelId)
+        {
+            DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
+            return channel?.SubscribedArtists ?? new SubscribedArtist[] { };
         }
 
 
