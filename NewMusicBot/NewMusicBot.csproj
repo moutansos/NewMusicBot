@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DanielStout.AsciiTableFormatter" Version="1.1.0" />
     <PackageReference Include="Discord.Net" Version="2.2.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.13.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.8" />
