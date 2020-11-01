@@ -24,7 +24,7 @@ stages:
       displayName: Build an image
       inputs:
         containerRegistry: 'Docker Hub - moutansos'
-        repository: 'newmusicbot'
+        repository: 'moutansos/newmusicbot'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         buildContext: '.'
