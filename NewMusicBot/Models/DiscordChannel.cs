@@ -37,5 +37,11 @@ namespace NewMusicBot.Models
                                this.GuildId,
                                this.CurrentArtistOptions,
                                this.SubscribedArtists.Select(artist => artist.Id == subscribedArtits.Id ? subscribedArtits : artist));
+
+        public DiscordChannel WithSubscribedArtistRemoved(string id) =>
+            new DiscordChannel(this.Id,
+                               this.GuildId,
+                               this.CurrentArtistOptions,
+                               this.SubscribedArtists.Where(artist => artist.Id != id));
     }
 }

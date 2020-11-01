@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NewMusicBot.Services
@@ -13,6 +11,7 @@ namespace NewMusicBot.Services
         IAsyncEnumerable<ReleaseMessage> CheckSubscriptions();
         Task<IEnumerable<SubscribedArtist>> GetAllSubscribedArtists(ulong channelId);
         Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, ulong guildId, string artistQuery);
+        Task<SubscribedArtist?> RemoveSubscribedArtist(ulong channelId, string artistId);
         Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection);
     }
 
@@ -31,6 +30,23 @@ namespace NewMusicBot.Services
         {
             DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
             return channel?.SubscribedArtists ?? new SubscribedArtist[] { };
+        }
+
+        public async Task<SubscribedArtist?> RemoveSubscribedArtist(ulong channelId, string artistId)
+        {
+            DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
+
+            if (channel is null)
+                return null;
+
+            DiscordChannel updatedChannel = channel.WithSubscribedArtistRemoved(artistId);
+            await subscriptionService.UpdateChannel(updatedChannel);
+
+            SubscribedArtist? artist = channel.SubscribedArtists
+                .Where(artist => artist.Id == artistId)
+                .FirstOrDefault();
+
+            return artist;
         }
 
 
