@@ -26,6 +26,27 @@ namespace NewMusicBot.Services
             this.musicInfoService = musicInfoService;
         }
 
+        public async Task IgnoreChannel(ulong channelId, ulong guildId)
+        {
+            DiscordChannel? existingChannel = await subscriptionService.GetChannel(channelId);
+
+            if(existingChannel is null)
+            {
+                DiscordChannel newChannel = new DiscordChannel(
+                    channelId.ToString(),
+                    guildId.ToString(),
+                    ignore: true,
+                    currentArtistOptions: new Dictionary<int, string>(),
+                    subscribedArtists: new SubscribedArtist[] { });
+
+                await subscriptionService.CreateChannel(newChannel);
+                return;
+            }
+
+            DiscordChannel updated = existingChannel.WithIgnored(ignored: true);
+            await subscriptionService.UpdateChannel(updated);
+        }
+
         public async Task<IEnumerable<SubscribedArtist>> GetAllSubscribedArtists(ulong channelId)
         {
             DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
