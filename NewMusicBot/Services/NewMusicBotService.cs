@@ -10,6 +10,7 @@ namespace NewMusicBot.Services
     {
         IAsyncEnumerable<ReleaseMessage> CheckSubscriptions();
         Task<IEnumerable<SubscribedArtist>> GetAllSubscribedArtists(ulong channelId);
+        Task IgnoreChannel(ulong channelId, ulong guildId);
         Task<IEnumerable<Artist>> InitiateArtistSubscriptionSearch(ulong channelId, ulong guildId, string artistQuery);
         Task<SubscribedArtist?> RemoveSubscribedArtist(ulong channelId, string artistId);
         Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection);
@@ -50,6 +51,10 @@ namespace NewMusicBot.Services
         public async Task<IEnumerable<SubscribedArtist>> GetAllSubscribedArtists(ulong channelId)
         {
             DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
+
+            if (channel?.Ignore ?? false)
+                return new SubscribedArtist[] { };
+
             return channel?.SubscribedArtists ?? new SubscribedArtist[] { };
         }
 
@@ -89,6 +94,7 @@ namespace NewMusicBot.Services
                 DiscordChannel newDiscordChannel = new DiscordChannel(
                     id: $"{channelId}",
                     guildId: $"{guildId}",
+                    ignore: false,
                     currentArtistOptions: artistOptions,
                     subscribedArtists: new SubscribedArtist[] { });
 
@@ -96,6 +102,9 @@ namespace NewMusicBot.Services
             }
             else
             {
+                if (channel.Ignore)
+                    return new Artist[] { };
+
                 DiscordChannel updatedDiscordChannel = channel.WithNewCurrentArtistOptions(artistOptions);
 
                 await subscriptionService.UpdateChannel(updatedDiscordChannel);
@@ -107,6 +116,9 @@ namespace NewMusicBot.Services
         public async Task<SubscribedArtist?> SelectArtistToSubscribeTo(ulong channelId, int selection)
         {
             DiscordChannel? channel = await subscriptionService.GetChannel(channelId);
+
+            if (channel?.Ignore ?? false)
+                return null;
 
             string? artistId = channel?.CurrentArtistOptions?[selection];
 
@@ -128,7 +140,7 @@ namespace NewMusicBot.Services
 
         public async IAsyncEnumerable<ReleaseMessage> CheckSubscriptions()
         {
-            IAsyncEnumerable<DiscordChannel> channels = subscriptionService.GetAllChannels();
+            IAsyncEnumerable<DiscordChannel> channels = subscriptionService.GetAllChannels().Where(channel => !channel.Ignore);
 
             await foreach(DiscordChannel channel in channels)
             {
@@ -151,6 +163,7 @@ namespace NewMusicBot.Services
                 foreach((IEnumerable<string> newReleases, SubscribedArtist currentArtist) in artistsWithNewReleases)
                     yield return new ReleaseMessage(
                         releases: await Task.WhenAll(newReleases.Select(newRelease => musicInfoService.GetReleaseById(newRelease))),
+                        artistName: currentArtist.Name,
                         guildId: Convert.ToUInt64(updatedChannel.GuildId),
                         channnelId: Convert.ToUInt64(updatedChannel.Id));
             }

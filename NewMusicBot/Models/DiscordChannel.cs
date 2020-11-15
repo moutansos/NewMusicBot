@@ -32,6 +32,7 @@ namespace NewMusicBot.Models
 
         public DiscordChannel WithSubscribedArtistAdded(SubscribedArtist newArtist) => new DiscordChannel(this.Id,
                                                                                                           this.GuildId,
+                                                                                                          this.Ignore,
                                                                                                           this.CurrentArtistOptions,
                                                                                                           this.SubscribedArtists.Concat(new SubscribedArtist[] { newArtist }));
 
