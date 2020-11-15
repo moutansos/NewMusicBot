@@ -9,11 +9,12 @@ namespace NewMusicBot.Models
         public ulong ChannelId { get; }
         public string ArtistName { get; }
 
-        public ReleaseMessage(IEnumerable<Release> releases, ulong guildId, ulong channnelId) 
+        public ReleaseMessage(IEnumerable<Release> releases, string artistName, ulong guildId, ulong channnelId) 
         {
             this.Releases = releases;
             this.GuildId = guildId;
             this.ChannelId = channnelId;
+            this.ArtistName = artistName;
         }
     }
 }
