@@ -1,4 +1,5 @@
 # New Music Bot
+[![Build Status](https://dev.azure.com/moutansos0695/alpinedev/_apis/build/status/moutansos.NewMusicBot?branchName=master)](https://dev.azure.com/moutansos0695/alpinedev/_build/latest?definitionId=4&branchName=master)
 
 A discord bot for getting notifications about new music, powered by Spotify, Azure Cosmos DB, and .NET Core.
 
