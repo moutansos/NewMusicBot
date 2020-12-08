@@ -49,7 +49,14 @@ namespace NewMusicBot.BackgroundServices
                 var nextrun = schedule.GetNextOccurrence(now);
                 if (now > nextRun)
                 {
-                    await Process();
+                    try
+                    {
+                        await Process();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogCritical(ex, "An unexpected error occured in the background service.");
+                    }
                     nextRun = schedule.GetNextOccurrence(DateTime.Now);
                 }
                 await Task.Delay(5000, stoppingToken); //5 seconds delay
