@@ -41,7 +41,9 @@ namespace NewMusicBot.Services
 
         public async Task<SubscribedArtist> RetrieveSubscribedArtist(string id)
         {
-            IEnumerable<SimpleAlbum> albums = await dataLayer.ExecuteQuery(new AlbumsForArtistQuery(id)).ToListAsync();
+            IEnumerable<SimpleAlbum> albums = await dataLayer.ExecuteQuery(new AlbumsForArtistQuery(id))
+                .Where(a => a.AlbumGroup != "appears_on")
+                .ToListAsync();
             FullArtist artist = await dataLayer.ExecuteQuery(new ArtistByIdQuery(id));
 
             return new SubscribedArtist(id, artist.Name, albums.Select(album => album.Id));
@@ -57,7 +59,6 @@ namespace NewMusicBot.Services
                 artistId: artist.Id,
                 artistName: artist.Name,
                 url: album.ExternalUrls["spotify"]);
-                
         }
     }
 }

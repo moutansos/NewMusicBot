@@ -43,6 +43,9 @@ namespace NewMusicBot.BackgroundServices
         {
             await clientWrapper.StartAsync();
 
+            await Process();
+            return;
+
             do
             {
                 var now = DateTime.Now;
